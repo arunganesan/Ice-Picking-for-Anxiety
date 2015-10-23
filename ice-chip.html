@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<link type="text/css" rel="stylesheet" href="css/ice-chip.css" />
+	</head>
+
+	<body>
+		<div id="wrapper">
+			<div id="road"></div>
+			<div id="ice-wrapper" class="thing">
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+				<div class="ice"><div class="image"><div class="cracks"></div></div></div>
+			</div>
+			<div id="item" class="thing"></div>
+			<div id="countdown">20</div>
+
+			<div id="item-list">
+				<div id="hammer" class="item selected"><img src="images/hammer.png" alt=""></div>
+				<div id="icepick" class="item"><img src="images/icepick.png" alt=""></div>
+				<div id="pickaxe" class="item"><img src="images/pickaxe.png" alt=""></div>
+			</div>
+		</div>
+
+		<div id="baseline-instructions" class="instructions">
+			Practice round <br> <br>
+			Press <img id="spacebar" src="images/spacebar-pagedown.png" alt=""> to melt the ice <br> <br>
+			<div class="button"><img src="images/ok.png" alt=""></div>
+		</div>
+
+		<div id="start-round-instructions" class="instructions">
+			Round <div id='roundNum'>0</div>. Pick your item. <br> <br>
+
+			<div class="button"><img src="images/ok.png" alt=""></div>
+		</div>
+
+		<div id="starttime">3</div>
+
+		<div id="game-over" class="instructions">
+			Game over! <br> <br>
+			Results <br><br>
+
+			<textarea name="" id="results" cols="30" rows="10"></textarea>
+			<div class="button"><img src="images/ok.png" alt=""></div>
+		</div>
+
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="js/jquery.timer.js"></script>
+		<script src="js/chipscript.js"></script>
+	</body>
+</html>
