@@ -1,8 +1,5 @@
 // Main function headers
-var mode = 'baseline';
-var shrinkTo = 0;
-var step = 5;
-var doneMelting = false;
+var mode = 'in-round';
 var baseline_timer = 0;
 var increment = 20;
 
@@ -10,16 +7,16 @@ var current = 'hammer';
 
 var requiredSteps = {
 	icepick: {
-		chipThresh: 5,
-		cleanThresh: 10
+		chipThresh: 3,
+		cleanThresh: 7
 	},
 	hammer: {
-		chipThresh: 10,
-		cleanThresh: 5
+		chipThresh: 7,
+		cleanThresh: 3
 	},
 	pickaxe: {
-		chipThresh: 7,
-		cleanThresh: 7
+		chipThresh: 5,
+		cleanThresh: 5
 	}
 }
 
@@ -29,11 +26,18 @@ var roundNum = 0;
 var log = "";
 
 
+/*
+Overall architecture
+
+[ Round updating, health updating ]
+[ Animation, action ]
+[ Key listeners ]
+*/
+
+
 
 /*
-
 Game Rounds Organization
-
 */
 
 function do_baseline () {
@@ -64,19 +68,102 @@ function updateRound () {
 
 
 
+/*
+
+ #####
+#     # #    # #####  # #    # #    # # #    #  ####
+#       #    # #    # # ##   # #   #  # ##   # #    #
+ #####  ###### #    # # # #  # ####   # # #  # #
+      # #    # #####  # #  # # #  #   # #  # # #  ###
+#     # #    # #   #  # #   ## #   #  # #   ## #    #
+ #####  #    # #    # # #    # #    # # #    #  ####
+
+#
+#        ####   ####  #  ####
+#       #    # #    # # #    #
+#       #    # #      # #
+#       #    # #  ### # #
+#       #    # #    # # #    #
+#######  ####   ####  #  ####
+
+*/
+
+// XXX: This needs to be set based on the baseline metric from before
+var total_chiphealth = 100;
+var total_melthealth = 100;
+var current_chiphealth = 100;
+var current_melthealth = 100;
+var done_melting = false;
+
+var ice-id = 0;
+
+function do_action () {
+	subtract from chip with current item
+	if already chipped, then melt
+	return the fraction of melted
+	if they are both 0, then we are done
+
+	return {
+		ice id: ice-id
+		chip: 0.2,
+		melt: 1,
+		all done: false
+	}
+}
+
+
+
+updateround () {
+	if we are done with experiment, save and exit.
+	otherwise, tell animator to reset
+	record data
+}
+
+
 
 
 
 /*
-Item Animations and shrinking
+   #
+  # #   #    # # #    #   ##   ##### #  ####  #    #  ####
+ #   #  ##   # # ##  ##  #  #    #   # #    # ##   # #
+#     # # #  # # # ## # #    #   #   # #    # # #  #  ####
+####### #  # # # #    # ######   #   # #    # #  # #      #
+#     # #   ## # #    # #    #   #   # #    # #   ## #    #
+#     # #    # # #    # #    #   #   #  ####  #    #  ####
 */
 
-
+var shrinkTo = 0;
 
 
 function doneShrinking () {
 	return (shrinkTo >= (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh));
 }
+
+function reset {
+	re-draw everything
+}
+
+
+// XXX: Need to write this function
+function actionate () {
+	get_status = do_action()
+	if all done: return all done
+	else {
+		ice = get-ice-id
+		ice.set_chipped(get-chipped)
+		ice.set_melted(get-melted)
+	}
+}
+
+function set_chipped () {
+	move the cracks in place
+}
+
+function set_melted () {
+	move the whole ice down
+}
+
 
 
 function shrink_and_animate () {
@@ -93,7 +180,7 @@ function shrink_and_animate () {
 			console.log("shrink to " + shrinkToPx);
 			log += '' + $.now() + ',action,shrinkTo='+shrinkTo+',total='+cleanThresh+'\n';
 			$(current_guy + ' .image').css('margin-top', (shrinkToPx) + 'px');
-			
+
 			if (doneShrinking() && currentIce < 8) {
 				currentIce ++;
 				shrinkTo = 0;
@@ -160,28 +247,14 @@ function item_animate (guy) {
 #     # ###### # #  # #    #  #   #        #        #
 #     # #    # # #   ##    #   #  #        #   #    #
 #     # #    # # #    #    #    # ######   #    ####
-
 */
 
 $('body').keyup(function(e) {
     if(e.keyCode == 32){
     	if ($('.instructions').is(':visible') || $('#starttime').is(':visible')) {
-    	} else if (mode == 'baseline') {
-
-				shrink_and_animate();
-
-      	if (doneShrinking() && currentIce == 8) {
-            baseline_timer = $.now() - baseline_timer;
-            var elapsed = baseline_timer/1000.0;
-            var rate =((requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh)/elapsed * 20);
-            increment = rate * 0.3;
-            console.log('' + (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh) + ' clicks in ' + elapsed + ' seconds. Rate: ' + rate + ' per 20 seconds. Setting to ' + (rate - increment));
-            log += '' + $.now()+ ',required_time=' + elapsed + ',rate_per_20=' + rate + ',setting_rate_to=' + (rate - increment) + '\n';
-            requiredSteps[current].cleanThresh = rate - increment;
-            mode = 'in-round';
-            updateRound();
-        }
     	} else if (mode == 'in-round') {
+				alldone? = actionate()
+				if all done: updateround, start over
 				shrink_and_animate();
 
       	if (shrinkTo >= (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh)) {
