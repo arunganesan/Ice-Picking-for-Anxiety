@@ -37,8 +37,8 @@ function updateRound () {
 	//if we are done with experiment, save and exit.
 	//otherwise, tell animator to reset
 	//record data
-	ice_id = 0;
     roundNum += 1;
+	
     //log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
     $('#roundNum').text(roundNum);
     $('#start-round-instructions').fadeIn();
@@ -46,6 +46,8 @@ function updateRound () {
     Example2.resetCountdown();
 	
 	reset_animation();
+	increment_health();
+	reset_values();
 }
 
 
@@ -54,7 +56,6 @@ function updateRound () {
 
 
 /*
-
  #####
 #     # #    # #####  # #    # #    # # #    #  ####
 #       #    # #    # # ##   # #   #  # ##   # #    #
@@ -70,10 +71,8 @@ function updateRound () {
 #       #    # #  ### # #
 #       #    # #    # # #    #
 #######  ####   ####  #  ####
-
 */
 
-// XXX: This needs to be set based on the baseline metric from before
 var total_chiphealth = 9;
 var total_sweephealth = 9;
 var current_chiphealth = 9;
@@ -90,16 +89,24 @@ var attack_power = {
 
 var ice_id = 0;
 
+function increment_health () {
+	total_chiphealth += 3;
+	total_sweephealth += 3;
+}
+
+function reset_values () {
+	ice_id = 0;
+	alldone = false;
+	current_chiphealth = total_chiphealth;
+	current_sweephealth = total_sweephealth;
+}
+
 function do_action () {
-	// Check if we are done
-	var alldone = false;
+	// Reset for the next one
 	if (current_chiphealth <= 0 && current_sweephealth <= 0) {
-		if (ice_id == 8) alldone = true;
-		else {
-			current_chiphealth = total_chiphealth;
-			current_sweephealth = total_sweephealth;
-			ice_id += 1;
-		}
+		current_chiphealth = total_chiphealth;
+		current_sweephealth = total_sweephealth;
+		ice_id += 1;
 	}
 	
 	if (!alldone) {
@@ -109,6 +116,12 @@ function do_action () {
 		if (current_chiphealth < 0) current_chiphealth = 0;
 		if (current_sweephealth < 0) current_sweephealth = 0;
 	}
+	
+	var alldone = false;
+	if (current_chiphealth <= 0 
+		&& current_sweephealth <= 0
+		&& ice_id == 8) 
+		alldone = true;
 	
 	return {
 		iceid: ice_id,
