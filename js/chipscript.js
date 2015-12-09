@@ -1,29 +1,9 @@
 // Main function headers
 var mode = 'in-round';
-var baseline_timer = 0;
-var increment = 20;
-
-var current = 'hammer';
-
-var requiredSteps = {
-	icepick: {
-		chipThresh: 3,
-		cleanThresh: 7
-	},
-	hammer: {
-		chipThresh: 7,
-		cleanThresh: 3
-	},
-	pickaxe: {
-		chipThresh: 5,
-		cleanThresh: 5
-	}
-}
-
-var currentIce = 0;
-
 var roundNum = 0;
 var log = "";
+
+
 
 
 /*
@@ -54,14 +34,19 @@ function show_game_over () {
 }
 
 function updateRound () {
+	//if we are done with experiment, save and exit.
+	//otherwise, tell animator to reset
+	//record data
+	ice_id = 0;
     roundNum += 1;
-    log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
+    //log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
     $('#roundNum').text(roundNum);
     $('#start-round-instructions').fadeIn();
     $('#wrapper').fadeTo(250, 0.4);
     Example2.resetCountdown();
+	
+	reset_animation();
 }
-
 
 
 
@@ -89,35 +74,53 @@ function updateRound () {
 */
 
 // XXX: This needs to be set based on the baseline metric from before
-var total_chiphealth = 100;
-var total_melthealth = 100;
-var current_chiphealth = 100;
-var current_melthealth = 100;
+var total_chiphealth = 9;
+var total_sweephealth = 9;
+var current_chiphealth = 9;
+var current_sweephealth = 9;
 var done_melting = false;
 
-var ice-id = 0;
+
+var current = 'hammer';
+var attack_power = {
+	icepick: { chip_thresh: 1, clean_thresh: 3 },
+	hammer: { chip_thresh: 3, clean_thresh: 1 },
+	pickaxe: { chip_thresh: 2, clean_thresh: 2 }
+}
+
+var ice_id = 0;
 
 function do_action () {
-	subtract from chip with current item
-	if already chipped, then melt
-	return the fraction of melted
-	if they are both 0, then we are done
-
+	// Check if we are done
+	var alldone = false;
+	if (current_chiphealth <= 0 && current_sweephealth <= 0) {
+		if (ice_id == 8) alldone = true;
+		else {
+			current_chiphealth = total_chiphealth;
+			current_sweephealth = total_sweephealth;
+			ice_id += 1;
+		}
+	}
+	
+	if (!alldone) {
+		if (current_chiphealth <= 0) current_sweephealth -= attack_power[current].clean_thresh;
+		else current_chiphealth -= attack_power[current].chip_thresh;
+		
+		if (current_chiphealth < 0) current_chiphealth = 0;
+		if (current_sweephealth < 0) current_sweephealth = 0;
+	}
+	
 	return {
-		ice id: ice-id
-		chip: 0.2,
-		melt: 1,
-		all done: false
+		iceid: ice_id,
+		chip: current_chiphealth/total_chiphealth,
+		clean: current_sweephealth/total_sweephealth,
+		alldone: alldone
 	}
 }
 
 
 
-updateround () {
-	if we are done with experiment, save and exit.
-	otherwise, tell animator to reset
-	record data
-}
+
 
 
 
@@ -133,65 +136,40 @@ updateround () {
 #     # #    # # #    # #    #   #   #  ####  #    #  ####
 */
 
-var shrinkTo = 0;
 
-
-function doneShrinking () {
-	return (shrinkTo >= (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh));
-}
-
-function reset {
-	re-draw everything
+function reset_animation () {
+	$('.ice .image .cracks').css('height', '0px');
+	$('.ice .image').css('margin-top', '0px');
 }
 
 
-// XXX: Need to write this function
 function actionate () {
 	get_status = do_action()
-	if all done: return all done
+	console.log(get_status);
+	if (get_status.alldone) return true;
 	else {
-		ice = get-ice-id
-		ice.set_chipped(get-chipped)
-		ice.set_melted(get-melted)
+		var ice = get_status.iceid;
+		var current_guy = '.ice:eq(' + ice + ')';
+		set_chipped(current_guy, get_status.chip);
+		set_cleaned(current_guy, get_status.clean);
+	    item_animate(current_guy);
 	}
 }
 
-function set_chipped () {
-	move the cracks in place
+function set_chipped (current_guy, percent) {
+	var px = (1-percent)*120;
+	console.log(px);
+	console.log(current_guy);
+	$(current_guy + ' .image .cracks').css('height', px + 'px');
 }
 
-function set_melted () {
-	move the whole ice down
+function set_cleaned (current_guy, percent) {
+	var px = (1-percent)*120;
+	console.log(px);
+	$(current_guy + ' .image').css('margin-top', px + 'px');
 }
 
 
-
-function shrink_and_animate () {
-    shrinkTo ++;
-
-		chipThresh = requiredSteps[current].chipThresh;
-		cleanThresh = requiredSteps[current].cleanThresh;
-		current_guy = '.ice:eq(' + currentIce + ')';
-
-		if (shrinkTo >= chipThresh) {
-			//	$(current_guy).addClass("cracks");
-			var percent = (shrinkTo-chipThresh)/(cleanThresh);
-			var shrinkToPx = percent * 120;
-			console.log("shrink to " + shrinkToPx);
-			log += '' + $.now() + ',action,shrinkTo='+shrinkTo+',total='+cleanThresh+'\n';
-			$(current_guy + ' .image').css('margin-top', (shrinkToPx) + 'px');
-
-			if (doneShrinking() && currentIce < 8) {
-				currentIce ++;
-				shrinkTo = 0;
-			}
-		} else {
-			var partialHeight = (shrinkTo+1)/chipThresh*120;
-			$(current_guy + ' .image .cracks').css('height', (partialHeight) + 'px');
-		}
-
-    item_animate(current_guy);
-}
 
 
 function item_animate (guy) {
@@ -253,15 +231,8 @@ $('body').keyup(function(e) {
     if(e.keyCode == 32){
     	if ($('.instructions').is(':visible') || $('#starttime').is(':visible')) {
     	} else if (mode == 'in-round') {
-				alldone? = actionate()
-				if all done: updateround, start over
-				shrink_and_animate();
-
-      	if (shrinkTo >= (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh)) {
-              console.log('' + (requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh) + ' clicks. Increasing to ' + ((requiredSteps[current].cleanThresh + requiredSteps[current].chipThresh) + increment));
-              requiredSteps[current].cleanThresh += increment;
-              updateRound();
-      	}
+				var alldone = actionate()
+				if (alldone) updateRound();
   		}
     } else if (e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51) {
         $('.item').removeClass('selected');
@@ -293,7 +264,7 @@ $('.button img').click(function() {
 	var button = this;
     var parent_id = $(button).parent().parent().attr('id');
     $('.instructions').fadeOut();
-
+	
     if (parent_id != 'game-over') {
         $('#starttime').text("3");
         $('#starttime').fadeIn(250).delay(2500).fadeOut(250);
@@ -303,9 +274,7 @@ $('.button img').click(function() {
 
     setTimeout(function () {
         $('#wrapper').fadeTo(250, 1);
-        shrinkTo = 0;
-        $('#ice').css('clip', 'rect('+(shrinkTo)+'px, 200px, 200px, 0px)');
-
+		
         if (parent_id == 'start-round-instructions') {
             $('#countdown').show();
             Example2.Timer.play();
