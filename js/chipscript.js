@@ -4,6 +4,11 @@ var roundNum = 0;
 var log = "";
 
 
+$(window).ready(function() {
+	var $_GET=[];
+	window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(a,name,value){$_GET[name]=value;});
+	console.log("Starting chip game with baseline " + $_GET['baseline']);
+});
 
 
 /*
@@ -73,25 +78,25 @@ function updateRound () {
 #######  ####   ####  #  ####
 */
 
-var total_chiphealth = 9;
-var total_sweephealth = 9;
-var current_chiphealth = 9;
-var current_sweephealth = 9;
+var total_chiphealth = 12;
+var total_sweephealth = 12;
+var current_chiphealth = 12;
+var current_sweephealth = 12;
 var done_melting = false;
 
 
 var current = 'hammer';
 var attack_power = {
-	icepick: { chip_thresh: 1, clean_thresh: 3 },
-	hammer: { chip_thresh: 3, clean_thresh: 1 },
-	pickaxe: { chip_thresh: 2, clean_thresh: 2 }
+	icepick: { chip_thresh: 4, clean_thresh: 2 },
+	hammer: { chip_thresh: 2, clean_thresh: 4 },
+	pickaxe: { chip_thresh: 3, clean_thresh: 3 }
 }
 
 var ice_id = 0;
 
 function increment_health () {
-	total_chiphealth += 3;
-	total_sweephealth += 3;
+	total_chiphealth += 4;
+	total_sweephealth += 4;
 }
 
 function reset_values () {

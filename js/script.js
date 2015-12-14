@@ -18,6 +18,10 @@ function do_baseline () {
 }
 
 
+$('#gameover-button').click(function() {
+	window.location.href='ice-chip.html?baseline=' + baseline_timer;
+});
+
 $('.button img').click(function() {
 	var button = this;
     var parent_id = $(button).parent().parent().attr('id');
@@ -75,6 +79,8 @@ function show_game_over () {
   $('#game-over').fadeIn();
   $('#wrapper').fadeTo(250, 0.4);
   $('#results').text(log);
+  
+  // In some time, go to the next page.
 }
 
 function updateRound () {
@@ -86,6 +92,9 @@ function updateRound () {
 
     Example2.resetCountdown();
 }
+
+
+
 
 $('body').keyup(function(e) {
     if(e.keyCode == 32){
