@@ -80,6 +80,12 @@ body {
 	line-height: 25px;
 }
 
+#baseline-instructions {
+	height: 300px;
+	width: 500px;
+	padding-top: 25px;
+}
+
 #start-round-instructions {
 	height: 150px;
 	padding-top: 25px;
@@ -121,6 +127,11 @@ body {
 .item.selected img {
 	filter: grayscale(0);
 	opacity:1;
+}
+
+img.keys {
+	height: 40px;
+	display: inline;
 }
 
 #spacebar {
