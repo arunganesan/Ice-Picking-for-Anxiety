@@ -18,9 +18,6 @@ function do_baseline () {
 }
 
 
-$('#gameover-button').click(function() {
-	window.location.href='ice-chip.html?baseline=' + baseline_timer;
-});
 
 $('.button img').click(function() {
 	var button = this;

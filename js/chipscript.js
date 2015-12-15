@@ -1,5 +1,5 @@
 // Main function headers
-var mode = 'in-round';
+var mode = 'baseline';
 var roundNum = 0;
 var log = "";
 
@@ -21,9 +21,18 @@ Overall architecture
 
 
 
-/*
-Game Rounds Organization
+/**
+ #####                          ######
+#     #   ##   #    # ######    #     #  ####  #    # #    # #####   ####
+#        #  #  ##  ## #         #     # #    # #    # ##   # #    # #
+#  #### #    # # ## # #####     ######  #    # #    # # #  # #    #  ####
+#     # ###### #    # #         #   #   #    # #    # #  # # #    #      #
+#     # #    # #    # #         #    #  #    # #    # #   ## #    # #    #
+ #####  #    # #    # ######    #     #  ####   ####  #    # #####   ####
 */
+
+var baseline_timer;
+var roundtime = 20*1000;
 
 function do_baseline () {
 	$('#wrapper').fadeTo(250, 0.4);
@@ -55,6 +64,25 @@ function updateRound () {
 	reset_values();
 }
 
+function startRounds () {
+	//log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
+    roundNum = 1;
+
+	var end_of_baseline = $.now();
+	var time_elapsed = end_of_baseline - baseline_timer;
+	roundtime = time_elapsed;
+	console.log(roundtime);
+	
+	$('#roundNum').text(roundNum);
+    $('#start-round-instructions').fadeIn();
+    $('#wrapper').fadeTo(250, 0.4);
+    Example2.resetCountdown();
+	
+	reset_animation();
+	reset_health();
+	reset_values();
+}
+
 
 
 
@@ -78,10 +106,10 @@ function updateRound () {
 #######  ####   ####  #  ####
 */
 
-var total_chiphealth = 12;
-var total_sweephealth = 12;
-var current_chiphealth = 12;
-var current_sweephealth = 12;
+var total_chiphealth = 16;
+var total_sweephealth = 16;
+var current_chiphealth = 16;
+var current_sweephealth = 16;
 var done_melting = false;
 
 
@@ -93,6 +121,12 @@ var attack_power = {
 }
 
 var ice_id = 0;
+
+function reset_health () {
+	total_chiphealth = 12;
+	total_sweephealth = 12;
+}
+
 
 function increment_health () {
 	total_chiphealth += 4;
@@ -144,7 +178,7 @@ function do_action () {
 
 
 
-/*
+/**
    #
   # #   #    # # #    #   ##   ##### #  ####  #    #  ####
  #   #  ##   # # ##  ##  #  #    #   # #    # ##   # #
@@ -251,7 +285,10 @@ $('body').keyup(function(e) {
     	} else if (mode == 'in-round') {
 				var alldone = actionate()
 				if (alldone) updateRound();
-  		}
+  		} else if (mode == 'baseline') {
+			var alldone = actionate();
+			if (alldone) startRounds();
+		}
     } else if (e.keyCode == 49 || e.keyCode == 50 || e.keyCode == 51) {
         $('.item').removeClass('selected');
         if (e.keyCode == 49) chosen = $('.item')[0];
@@ -354,7 +391,7 @@ var Example2 = new (function() {
     var $countdown;
 
     var incrementTime = 70;
-    var currentTime = 20*1000; // 5 minutes (in milliseconds)
+    var currentTime = roundtime;
 
     $(function() {
 
@@ -374,7 +411,7 @@ var Example2 = new (function() {
         if (currentTime == 0) {
             Example2.Timer.stop();
             show_game_over ();
-            currentTime = 20*1000;
+            currentTime = roundtime;
             Example2.resetCountdown();
             return;
         }
@@ -388,8 +425,8 @@ var Example2 = new (function() {
     this.resetCountdown = function() {
 
         // Get time from form
-        var newTime = 20*1000;//parseInt($form.find('input[type=text]').val()) * 1000;
-        if (newTime > 0) {currentTime = newTime;}
+        var newTime = roundtime;
+		if (newTime > 0) {currentTime = newTime;}
 
         // Stop and reset timer
         Example2.Timer.stop().once();
@@ -413,5 +450,5 @@ function formatTime(time) {
 
 $(document).ready(function() {
 	Example2.Timer.stop();
-	//setTimeout(do_baseline, 500);
+	setTimeout(do_baseline, 500);
 });
