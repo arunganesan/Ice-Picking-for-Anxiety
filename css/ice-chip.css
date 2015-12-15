@@ -70,8 +70,18 @@ body {
 	display: none;
 }
 
+#pregame-instructions {
+	height: 600px;
+	width: 500px;
+	margin: auto;
+	top: 0; left: 0; right: 0; bottom: 0;
+	font-size: 15px;
+	padding: 20px;
+	line-height: 25px;
+}
+
 #start-round-instructions {
-	height: 250px;
+	height: 150px;
 	padding-top: 25px;
 }
 

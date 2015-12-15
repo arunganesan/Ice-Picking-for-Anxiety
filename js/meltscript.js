@@ -17,6 +17,13 @@ function do_baseline () {
 	Example2.resetCountdown();
 }
 
+function do_pregame () {
+	$('#wrapper').fadeTo(250, 0.4);
+	$('#pregame-instructions').fadeIn();
+	Example2.Timer.stop();
+	Example2.resetCountdown();
+}
+
 
 
 $('.button img').click(function() {
@@ -24,27 +31,31 @@ $('.button img').click(function() {
     var parent_id = $(button).parent().parent().attr('id');
     $('.instructions').fadeOut();
 
-    if (parent_id != 'game-over') {
-        $('#starttime').text("3");
-        $('#starttime').fadeIn(250).delay(2500).fadeOut(250);
-        setTimeout(function() {$('#starttime').text("2");}, 1000);
-        setTimeout(function() {$('#starttime').text("1");}, 2000);
-    }
-
-    setTimeout(function () {
-        $('#wrapper').fadeTo(250, 1);
-        shrinkTo = 0;
-        $('#ice').css('clip', 'rect('+(shrinkTo)+'px, 200px, 200px, 0px)');
-        
-        if (parent_id == 'start-round-instructions') {
-            $('#countdown').show();
-            Example2.Timer.play();
-            log += '' + $.now() + ',round_start\n';
-        } else {
-            baseline_timer = $.now();
-            log += '' + baseline_timer + ',baseline_start\n';
-        }
-    }, 3000);
+	if (parent_id == 'pregame-instructions') {
+		do_baseline();
+	} else {
+		if (parent_id != 'game-over') {
+			$('#starttime').text("3");
+			$('#starttime').fadeIn(250).delay(2500).fadeOut(250);
+			setTimeout(function() {$('#starttime').text("2");}, 1000);
+			setTimeout(function() {$('#starttime').text("1");}, 2000);
+		}
+		
+		setTimeout(function () {
+			$('#wrapper').fadeTo(250, 1);
+			shrinkTo = 0;
+			$('#ice').css('clip', 'rect('+(shrinkTo)+'px, 200px, 200px, 0px)');
+			
+			if (parent_id == 'start-round-instructions') {
+				$('#countdown').show();
+				Example2.Timer.play();
+				log += '' + $.now() + ',round_start\n';
+			} else if (parent_id == 'baseline_instructions') {
+				baseline_timer = $.now();
+				log += '' + baseline_timer + ',baseline_start\n';
+			}
+		}, 3000);
+	}
     //$('#wrapper').fadeTo(250, 1);
 
 	
@@ -197,7 +208,8 @@ var Example2 = new (function() {
 
 $(document).ready(function() {
 	Example2.Timer.stop();
-	setTimeout(do_baseline, 500);
+	//setTimeout(do_baseline, 500);
+	setTimeout(do_pregame, 500);
 });
 
 
