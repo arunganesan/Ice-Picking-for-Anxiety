@@ -50,7 +50,8 @@ $('.button img').click(function() {
 				$('#countdown').show();
 				Example2.Timer.play();
 				log += '' + $.now() + ',round_start\n';
-			} else if (parent_id == 'baseline_instructions') {
+			} else if (parent_id == 'baseline-instructions') {
+				
 				baseline_timer = $.now();
 				log += '' + baseline_timer + ',baseline_start\n';
 			}
@@ -118,7 +119,7 @@ $('body').keyup(function(e) {
                 console.log('' + requiredSteps + ' clicks in ' + elapsed + ' seconds. Rate: ' + rate + ' per 20 seconds. Setting to ' + (rate - increment));
                 log += '' + $.now()+ ',required_time=' + elapsed + ',rate_per_20=' + rate + ',setting_rate_to=' + (rate - increment) + '\n';
                 requiredSteps = rate - increment;
-                mode = 'in-round';
+				mode = 'in-round';
                 updateRound();
 
             }
