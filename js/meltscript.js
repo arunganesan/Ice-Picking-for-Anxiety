@@ -8,7 +8,12 @@ var baseline_timer = 0;
 var increment = 20;
 
 var roundNum = 0;
-var log = "";
+var log = [{'game': 'melt'}];
+
+function add_to_log (obj) {
+	obj['timestamp'] = $.now();
+	log.push(obj);
+}
 
 function do_baseline () {
 	$('#wrapper').fadeTo(250, 0.4);
@@ -23,8 +28,6 @@ function do_pregame () {
 	Example2.Timer.stop();
 	Example2.resetCountdown();
 }
-
-
 
 $('.button img').click(function() {
 	var button = this;
@@ -49,11 +52,11 @@ $('.button img').click(function() {
 			if (parent_id == 'start-round-instructions') {
 				$('#countdown').show();
 				Example2.Timer.play();
-				log += '' + $.now() + ',round_start\n';
+				add_to_log({'state': 'round start'});
 			} else if (parent_id == 'baseline-instructions') {
 				
 				baseline_timer = $.now();
-				log += '' + baseline_timer + ',baseline_start\n';
+				add_to_log({'state': 'baseline start'});
 			}
 		}, 3000);
 	}
@@ -69,7 +72,7 @@ $('.item').click(function() {
     var new_loc = 'url(' + $('img', this).attr('src') + ')';
     console.log(new_loc);
     
-    log += '' + $.now() + ',chosen=' + new_loc + '\n';
+	add_to_log({'item': new_loc});
 
     $('#item').css('background-image', new_loc);
 });
@@ -79,7 +82,11 @@ function shrink_and_animate () {
     var percent = shrinkTo/requiredSteps;
     var shrinkToPx = percent * 200;
 
-    log += '' + $.now() + ',action,shrinkTo='+shrinkTo+',total='+requiredSteps+'\n';
+    add_to_log({
+		'state': 'action', 
+		'shrinkTo': shrinkTo,
+		'total': requiredSteps
+	});
     $('#ice').css('clip', 'rect('+(shrinkToPx)+'px, 200px, 200px, 0px)');
     item_animate();
 }
@@ -87,14 +94,19 @@ function shrink_and_animate () {
 function show_game_over () {
   $('#game-over').fadeIn();
   $('#wrapper').fadeTo(250, 0.4);
-  $('#results').text(log);
+  $('#results').text(JSON.stringify(log));
   
-  // In some time, go to the next page.
+  $.post("http://arunganesan.com/anxiety-study/submit.php", JSON.stringify(log));
 }
 
 function updateRound () {
     roundNum += 1;
-    log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps + '\n';
+    add_to_log({
+		'state': 'update round',
+		'roundnum': roundNum,
+		'requiredSteps': requiredSteps
+	});
+
     $('#roundNum').text(roundNum);
     $('#start-round-instructions').fadeIn();
     $('#wrapper').fadeTo(250, 0.4);
@@ -117,7 +129,12 @@ $('body').keyup(function(e) {
                 var rate =(requiredSteps/elapsed * 20);
                 increment = rate * 0.3;
                 console.log('' + requiredSteps + ' clicks in ' + elapsed + ' seconds. Rate: ' + rate + ' per 20 seconds. Setting to ' + (rate - increment));
-                log += '' + $.now()+ ',required_time=' + elapsed + ',rate_per_20=' + rate + ',setting_rate_to=' + (rate - increment) + '\n';
+                add_to_log({
+					'state': 'done baseline',
+					'required time': elapsed,
+					'rate per 20': rate,
+					'setting rate to': rate - increment
+				});
                 requiredSteps = rate - increment;
 				mode = 'in-round';
                 updateRound();

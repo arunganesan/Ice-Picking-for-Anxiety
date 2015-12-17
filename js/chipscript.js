@@ -1,8 +1,7 @@
 // Main function headers
 var mode = 'baseline';
 var roundNum = 0;
-var log = "";
-
+var log = [{'game': 'chip'}];
 
 $(window).ready(function() {
 	var $_GET=[];
@@ -10,6 +9,10 @@ $(window).ready(function() {
 	console.log("Starting chip game with baseline " + $_GET['baseline']);
 });
 
+function add_to_log (obj) {
+	obj['timestamp'] = $.now();
+	log.push(obj);
+}
 
 /*
 Overall architecture
@@ -53,7 +56,8 @@ function do_baseline () {
 function show_game_over () {
   $('#game-over').fadeIn();
   $('#wrapper').fadeTo(250, 0.4);
-  $('#results').text(log);
+  $('#results').text(JSON.stringify(log));
+  $.post("http://arunganesan.com/anxiety-study/submit.php", JSON.stringify(log));
 }
 
 function updateRound () {
@@ -62,8 +66,8 @@ function updateRound () {
 	//record data
     roundNum += 1;
 	
-    //log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
-    $('#roundNum').text(roundNum);
+
+	$('#roundNum').text(roundNum);
     $('#start-round-instructions').fadeIn();
     $('#wrapper').fadeTo(250, 0.4);
     Example2.resetCountdown();
@@ -71,12 +75,18 @@ function updateRound () {
 	reset_animation();
 	increment_health();
 	reset_values();
+
+    add_to_log({
+		'state': 'update round',
+		'round num': roundNum,
+		'new health': total_chiphealth
+	});
 }
 
 function startRounds () {
-	//log += '' + $.now() + ',round_update,num=' + roundNum + ',requiredSteps=' + requiredSteps[current].cleanThresh + '\n';
     roundNum = 1;
 
+	
 	var end_of_baseline = $.now();
 	var time_elapsed = end_of_baseline - baseline_timer;
 	roundtime = time_elapsed;
@@ -90,6 +100,12 @@ function startRounds () {
 	reset_animation();
 	reset_health();
 	reset_values();
+	
+	add_to_log({
+		'state': 'starting rounds',
+		'round num': roundNum,
+		'starting health': total_chiphealth
+	});
 }
 
 
@@ -205,7 +221,10 @@ function reset_animation () {
 
 
 function actionate () {
-	get_status = do_action()
+	get_status = do_action();
+	get_status['state'] = 'did action';
+	add_to_log(get_status);
+	
 	console.log(get_status);
 	if (get_status.alldone) return true;
 	else {
@@ -303,8 +322,7 @@ $('body').keyup(function(e) {
         if (e.keyCode == 49) chosen = $('.item')[0];
         if (e.keyCode == 50) chosen = $('.item')[1];
         if (e.keyCode == 51) chosen = $('.item')[2];
-
-				current = chosen.id;
+		current = chosen.id;
         $(chosen).click();
     }
 });
@@ -317,8 +335,11 @@ $('.item').click(function() {
     var new_loc = 'url(' + $('img', this).attr('src') + ')';
     console.log(new_loc);
 
-    log += '' + $.now() + ',chosen=' + new_loc + '\n';
-
+    add_to_log({
+		'state': 'item changed',
+		'chosen': new_loc
+	});
+	
     $('#item').css('background-image', new_loc);
 });
 
@@ -345,10 +366,14 @@ $('.button img').click(function() {
 			if (parent_id == 'start-round-instructions') {
 				$('#countdown').show();
 				Example2.Timer.play();
-				log += '' + $.now() + ',round_start\n';
+				add_to_log({
+					'state': 'round starting'
+				});				
 			} else {
 				baseline_timer = $.now();
-				log += '' + baseline_timer + ',baseline_start\n';
+				add_to_log({
+					'state': 'baseline starting'
+				});
 			}
 		}, 3000);
 	}
