@@ -56,8 +56,15 @@ function do_baseline () {
 function show_game_over () {
   $('#game-over').fadeIn();
   $('#wrapper').fadeTo(250, 0.4);
-  $('#results').text(JSON.stringify(log));
-  $.post("http://arunganesan.com/anxiety-study/submit.php", JSON.stringify(log));
+  var json = JSON.stringify(log);
+  $('#results').text(json);
+  
+  $.ajax({
+    type: "POST",
+    url: "http://arunganesan.com/anxiety-study/submit.php",
+    data: "state=" + json,
+    dataType: "text"
+  });
 }
 
 function updateRound () {

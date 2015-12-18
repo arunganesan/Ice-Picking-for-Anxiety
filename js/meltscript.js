@@ -94,9 +94,17 @@ function shrink_and_animate () {
 function show_game_over () {
   $('#game-over').fadeIn();
   $('#wrapper').fadeTo(250, 0.4);
-  $('#results').text(JSON.stringify(log));
+  var json = JSON.stringify(log);
+  $('#results').text(json);
   
-  $.post("http://arunganesan.com/anxiety-study/submit.php", JSON.stringify(log));
+  $.ajax({
+    type: "POST",
+    url: "http://arunganesan.com/anxiety-study/submit.php",
+    data: "state=" + json,
+    dataType: "text"
+  });
+  
+  //$.post("http://arunganesan.com/anxiety-study/submit.php", JSON.stringify(log));
 }
 
 function updateRound () {
